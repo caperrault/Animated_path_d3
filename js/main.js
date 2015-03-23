@@ -3,21 +3,100 @@ var mapboxTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v3/caperrault.k82d7b
     attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>'
 });
 
+// var pointsgeojson =
+// {
+// "type": "FeatureCollection",
+// "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+//
+// "features": [
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.414771667, 37.786853333 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.414786667, 37.786591667 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.635016667, 38.486088333 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.823, 38.4022 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.51078827, 37.760056512 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.404568227, 37.80668523 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.414859978, 37.786517288 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.99202, 40.72559 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.99151, 40.72539 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98865, 40.72418 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98798, 40.7239 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98751, 40.72455 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98618, 40.72637 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98575, 40.72696 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98531, 40.72757 ] } },
+// { "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98455, 40.72725 ] } }
+// ]
+// };
+
+// console.log("pointsgeojson", pointsgeojson);
+
+
+var userPoints = {
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": []
+};
+
 
 var map = L.map('map')
-    .addLayer(mapboxTiles);
+    .addLayer(mapboxTiles)
+    .setView([0, 0], 2);
+
+  function createUserMap () {
+    var feed = new Instafeed({
+      get: 'user',
+      target: 'feed-test',
+      userId: 180449955,
+      limit: '60',
+      clientId: '37c96dd1404a4fb0a6610dff7342292e',
+      accessToken: '1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105',
+      success: function(data) {
+        console.log('data', data);
+
+        for (var i = 0; i < data.data.length; i ++) {
+          userPoints.features.push(
+            {
+              "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [data.data[i].location.longitude, data.data[i].location.latitude]},
+            });
+        }
+
+        console.log("geojson", userPoints);
+
+        var myLayer = L.mapbox.featureLayer().addTo(map).setGeoJSON(userPoints);
+
+      }
+    });
+
+    feed.run();
+
+  }
+
+  createUserMap();
+
+
+
+var userName,
+    userIDNumber,
+    userPath,
+    userPathCoordinates = [];
+
+/*
 
 var featureLayer = L.mapbox.featureLayer()
 .loadURL('points.geojson')
 .addTo(map);
 
+*/
 
-featureLayer.on('ready', function() {
+/*featureLayer.on('ready', function() {
 // featureLayer.getBounds() returns the corners of the furthest-out markers,
 // and map.fitBounds() makes sure that the map contains these.
 map.fitBounds(featureLayer.getBounds());
 });
+*/
 
+
+/*
 
 // we will be appending the SVG to the Leaflet map pane
 // g (group) element will be inside the svg
@@ -284,6 +363,6 @@ function applyLatLngToLayer(d) {
     var y = d.geometry.coordinates[1]
     var x = d.geometry.coordinates[0]
     return map.latLngToLayerPoint(new L.LatLng(y, x))
-
-
 }
+
+*/
