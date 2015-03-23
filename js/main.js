@@ -33,11 +33,11 @@ var pointsgeojson =
 //     userPath,
 //     userPathCoordinates = [];
 
-// var userPoints = {
-// "type": "FeatureCollection",
-// "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-// "features": []
-// };
+var userPoints = {
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": []
+};
 //
 // var userBounds = function (myLayer) {
 //   map.fitBounds(myLayer.getBounds());
@@ -56,49 +56,34 @@ var svg = d3.select(map.getPanes().overlayPane).append("svg");
     // original SVG
 var g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
-//   function createUserMap () {
-//     var feed = new Instafeed({
-//       get: 'user',
-//       target: 'feed-test',
-//       userId: 180449955,
-//       limit: '60',
-//       clientId: '37c96dd1404a4fb0a6610dff7342292e',
-//       accessToken: '1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105',
-//       success: function(data) {
-//         console.log('data', data);
-//
-//         for (var i = 0; i < data.data.length; i ++) {
-//           userPoints.features.push(
-//             {
-//               "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [data.data[i].location.longitude, data.data[i].location.latitude]},
-//             });
-//         }
-//
-//         console.log("geojson", userPoints);
-//
-//         var userLayer = L.mapbox.featureLayer().setGeoJSON(userPoints).addTo(map);
-//       //  userBounds(userLayer)
-//       }
-//     });
-//
-//     feed.run();
-//
-//   }
+  function createUserMap () {
+    var feed = new Instafeed({
+      get: 'user',
+      target: 'feed-test',
+      userId: 180449955,
+      limit: '60',
+      clientId: '37c96dd1404a4fb0a6610dff7342292e',
+      accessToken: '1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105',
+      success: function(data) {
+        console.log('data', data);
 
-// var userLayer = L.mapbox.featureLayer().setGeoJSON(pointsgeojson).addTo(map);
+        for (var i = 0; i < data.data.length; i ++) {
+          userPoints.features.push(
+            {
+              "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [data.data[i].location.longitude, data.data[i].location.latitude]},
+            });
+        }
 
-//  var dthree = function(collection) {
+        console.log("geojson", userPoints);
 
-//read in the GeoJSON. This function is asynchronous so
-// anything that needs the json file should be within
-
-//d3.json("points.geojson", function(collection) {
+        var userLayer = L.mapbox.featureLayer().setGeoJSON(userPoints).addTo(map);
+      //  userBounds(userLayer)
 
       // this is not needed right now, but for future we may need
       // to implement some filtering. This uses the d3 filter function
       // featuresdata is an array of point objects
 
-      var featuresdata = pointsgeojson.features.filter(function(d) {
+      var featuresdata = userPoints.features.filter(function(d) {
           return d.properties.id == "route1"
       })
 
@@ -205,7 +190,7 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
       // Reposition the SVG to cover the features.
       function reset() {
-          var bounds = d3path.bounds(pointsgeojson),
+          var bounds = d3path.bounds(userPoints),
               topLeft = bounds[0],
               bottomRight = bounds[1];
 
@@ -348,5 +333,24 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
       return map.latLngToLayerPoint(new L.LatLng(y, x))
   }
 
-  //createUserMap();
+
+      }
+    });
+
+    feed.run();
+
+  }
+
+// var userLayer = L.mapbox.featureLayer().setGeoJSON(pointsgeojson).addTo(map);
+
+//  var dthree = function(collection) {
+
+//read in the GeoJSON. This function is asynchronous so
+// anything that needs the json file should be within
+
+//d3.json("points.geojson", function(collection) {
+
+
+
+  createUserMap();
   //dthree(userPoints);
