@@ -3,50 +3,23 @@ var mapboxTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v3/caperrault.k82d7b
     attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>'
 });
 
-var pointsgeojson =
-{
-"type": "FeatureCollection",
-"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-
-"features": [
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.414771667, 37.786853333 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.414786667, 37.786591667 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.635016667, 38.486088333 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.823, 38.4022 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.51078827, 37.760056512 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.404568227, 37.80668523 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -122.414859978, 37.786517288 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.99202, 40.72559 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.99151, 40.72539 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98865, 40.72418 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98798, 40.7239 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98751, 40.72455 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98618, 40.72637 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98575, 40.72696 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98531, 40.72757 ] } },
-{ "type": "Feature", "properties": { "id": "route1"}, "geometry": { "type": "Point", "coordinates": [ -73.98455, 40.72725 ] } }
-]
-};
-
-// var userName,
-//     userIDNumber,
-//     userPath,
-//     userPathCoordinates = [];
+var userName,
+    userIDNumber;
 
 var userPoints = {
 "type": "FeatureCollection",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": []
 };
-//
-// var userBounds = function (myLayer) {
-//   map.fitBounds(myLayer.getBounds());
-// }
-//
+
+var userBounds = function (myLayer) {
+  map.fitBounds(myLayer.getBounds());
+}
+
 var map = L.map('map')
     .addLayer(mapboxTiles)
     .setView([0, 0], 2);
-//
+
     // we will be appending the SVG to the Leaflet map pane
     // g (group) element will be inside the svg
 var svg = d3.select(map.getPanes().overlayPane).append("svg");
@@ -56,11 +29,35 @@ var svg = d3.select(map.getPanes().overlayPane).append("svg");
     // original SVG
 var g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
-  function createUserMap () {
+  $('#button').on('click', function(event) {
+
+    event.preventDefault();
+
+      //clearMapOverlays();
+      userName = document.getElementById('userHandle').value;
+      console.log('userName', userName);
+      getIDNumber();
+      console.log('userIDN', userIDNumber);
+  })
+
+  function getIDNumber() {
+      $.ajax({
+        dataType: "jsonp",
+        url:"https://api.instagram.com/v1/users/search?q=" + userName + "&access_token=1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105&callback=?",
+        success: function(results) {
+          console.log('data', results.data[0].id);
+          userIDNumber = results.data[0].id;
+          createUserMap(userIDNumber);
+        }
+      });
+  }
+
+  function createUserMap (IDnumber) {
     var feed = new Instafeed({
       get: 'user',
       target: 'feed-test',
-      userId: 180449955,
+    //  userId: 180449955,
+      userId: parseInt(IDnumber),
       limit: '60',
       clientId: '37c96dd1404a4fb0a6610dff7342292e',
       accessToken: '1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105',
@@ -76,8 +73,9 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
         console.log("geojson", userPoints);
 
-        var userLayer = L.mapbox.featureLayer().setGeoJSON(userPoints).addTo(map);
-      //  userBounds(userLayer)
+        var userLayer = L.mapbox.featureLayer().setGeoJSON(userPoints);
+        //.addTo(map);
+        userBounds(userLayer)
 
       // this is not needed right now, but for future we may need
       // to implement some filtering. This uses the d3 filter function
@@ -320,9 +318,6 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
            this.stream.point(point.x, point.y);
        } //end projectPoint
 
-  //});
-
-
   // similar to projectPoint this function converts lat/long to
   // svg coordinates except that it accepts a point from our
   // GeoJSON
@@ -333,7 +328,6 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
       return map.latLngToLayerPoint(new L.LatLng(y, x))
   }
 
-
       }
     });
 
@@ -341,16 +335,4 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
   }
 
-// var userLayer = L.mapbox.featureLayer().setGeoJSON(pointsgeojson).addTo(map);
-
-//  var dthree = function(collection) {
-
-//read in the GeoJSON. This function is asynchronous so
-// anything that needs the json file should be within
-
-//d3.json("points.geojson", function(collection) {
-
-
-
-  createUserMap();
-  //dthree(userPoints);
+// createUserMap();
