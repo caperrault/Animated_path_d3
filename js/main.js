@@ -28,8 +28,10 @@ var mapboxTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v3/caperrault.k82d7b
 // ]
 // };
 
-// console.log("pointsgeojson", pointsgeojson);
-
+// var userName,
+//     userIDNumber,
+//     userPath,
+//     userPathCoordinates = [];
 
 var userPoints = {
 "type": "FeatureCollection",
@@ -37,6 +39,9 @@ var userPoints = {
 "features": []
 };
 
+var userBounds = function (myLayer) {
+  map.fitBounds(myLayer.getBounds());
+}
 
 var map = L.map('map')
     .addLayer(mapboxTiles)
@@ -62,8 +67,8 @@ var map = L.map('map')
 
         console.log("geojson", userPoints);
 
-        var myLayer = L.mapbox.featureLayer().addTo(map).setGeoJSON(userPoints);
-
+        var userLayer = L.mapbox.featureLayer().setGeoJSON(userPoints).addTo(map);
+        userBounds(userLayer)
       }
     });
 
@@ -72,29 +77,6 @@ var map = L.map('map')
   }
 
   createUserMap();
-
-
-
-var userName,
-    userIDNumber,
-    userPath,
-    userPathCoordinates = [];
-
-/*
-
-var featureLayer = L.mapbox.featureLayer()
-.loadURL('points.geojson')
-.addTo(map);
-
-*/
-
-/*featureLayer.on('ready', function() {
-// featureLayer.getBounds() returns the corners of the furthest-out markers,
-// and map.fitBounds() makes sure that the map contains these.
-map.fitBounds(featureLayer.getBounds());
-});
-*/
-
 
 /*
 
