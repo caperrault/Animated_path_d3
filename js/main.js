@@ -29,25 +29,54 @@ var svg = d3.select(map.getPanes().overlayPane).append("svg");
     // original SVG
 var g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
-  $('#button').on('click', function(event) {
+  $('#mapButton').on('click', function(event) {
 
     event.preventDefault();
+    d3. selectAll(".lineConnect").style("display", "none");
 
+    for (var i = 0; i < userPoints.features.length; i ++) {
+      delete userPoints.features[i];
+    };
+    console.log('userPoints', userPoints);
       //clearMapOverlays();
       userName = document.getElementById('userHandle').value;
-      console.log('userName', userName);
-      getIDNumber();
-      console.log('userIDN', userIDNumber);
+      getIDNumberMap();
   })
 
-  function getIDNumber() {
+  function getIDNumberMap() {
       $.ajax({
         dataType: "jsonp",
         url:"https://api.instagram.com/v1/users/search?q=" + userName + "&access_token=1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105&callback=?",
         success: function(results) {
-          console.log('data', results.data[0].id);
+
           userIDNumber = results.data[0].id;
           createUserMap(userIDNumber);
+        }
+      });
+  }
+
+  $('#animateButton').on('click', function(event) {
+
+    event.preventDefault();
+    d3. selectAll(".lineConnect").style("display", "none");
+
+    for (var i = 0; i < userPoints.features.length; i ++) {
+      delete userPoints.features[i];
+    };
+    console.log('userPoints', userPoints);
+      //clearMapOverlays();
+      userName = document.getElementById('userHandle').value;
+      getIDNumberAnimate();
+  })
+
+  function getIDNumberAnimate() {
+      $.ajax({
+        dataType: "jsonp",
+        url:"https://api.instagram.com/v1/users/search?q=" + userName + "&access_token=1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105&callback=?",
+        success: function(results) {
+
+          userIDNumber = results.data[0].id;
+          animateUserMap(userIDNumber);
         }
       });
   }
@@ -62,7 +91,39 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
       clientId: '37c96dd1404a4fb0a6610dff7342292e',
       accessToken: '1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105',
       success: function(data) {
-        console.log('data', data);
+
+        for (var i = 0; i < data.data.length; i ++) {
+          userPoints.features.push(
+            {
+              "type": "Feature", "properties": { "id": "route1", 'marker-size': 'small', "marker-color": "#ff8888"}, "geometry": { "type": "Point", "coordinates": [data.data[i].location.longitude, data.data[i].location.latitude]},
+            });
+        }
+
+        console.log('userPoints', userPoints);
+        var userLayer = L.mapbox.featureLayer().setGeoJSON(userPoints, {
+          style: function(feature) { return feature.properties; }
+          })
+          .addTo(map);
+        userBounds(userLayer);
+
+      }
+    });
+
+    feed.run();
+
+  }
+
+
+  function animateUserMap (IDnumber) {
+    var feed = new Instafeed({
+      get: 'user',
+      target: 'feed-test',
+    //  userId: 180449955,
+      userId: parseInt(IDnumber),
+      limit: '60',
+      clientId: '37c96dd1404a4fb0a6610dff7342292e',
+      accessToken: '1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105',
+      success: function(data) {
 
         for (var i = 0; i < data.data.length; i ++) {
           userPoints.features.push(
@@ -71,8 +132,7 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
             });
         }
 
-        console.log("geojson", userPoints);
-
+        console.log('userPoints', userPoints);
         var userLayer = L.mapbox.featureLayer().setGeoJSON(userPoints);
         //.addTo(map);
         userBounds(userLayer)
@@ -139,7 +199,8 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
           .data([featuresdata])
           .enter()
           .append("path")
-          .attr("class", "lineConnect");
+          .attr("class", "lineConnect")
+          .style("display", null);
 
       // This will be our traveling circle it will
       // travel along our path
@@ -147,7 +208,6 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
           .attr("r", 10)
           .attr("id", "marker")
           .attr("class", "travelMarker");
-
 
       // For simplicity I hard-coded this! I'm taking
       // the first and the last object (the origin)
@@ -161,7 +221,7 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
           .enter()
           .append("circle", ".drinks")
           .attr("r", 5)
-          .style("fill", "red")
+          .style("fill", "#ff8888")
           .style("opacity", "1");
 
       // I want names for my coffee and beer
@@ -334,5 +394,3 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
     feed.run();
 
   }
-
-// createUserMap();
