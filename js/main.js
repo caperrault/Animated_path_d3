@@ -1,5 +1,5 @@
 L.mapbox.accessToken = 'pk.eyJ1IjoiY2FwZXJyYXVsdCIsImEiOiI1ekhRZkRRIn0.p7tBrXttZFH2Xbfbc-whYA';
-var mapboxTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v3/caperrault.k82d7bm8/{z}/{x}/{y}.png?access_token=' + L.mapbox.accessToken, {
+var mapboxTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v3/caperrault.li24hcpp/{z}/{x}/{y}.png?access_token=' + L.mapbox.accessToken, {
     attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>'
 });
 
@@ -32,12 +32,8 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
   $('#mapButton').on('click', function(event) {
 
     event.preventDefault();
-    d3. selectAll(".lineConnect").style("display", "none");
 
-    for (var i = 0; i < userPoints.features.length; i ++) {
-      delete userPoints.features[i];
-    };
-    console.log('userPoints', userPoints);
+    console.log('features inside the userPoints', userPoints.features.length);
       //clearMapOverlays();
       userName = document.getElementById('userHandle').value;
       getIDNumberMap();
@@ -58,12 +54,7 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
   $('#animateButton').on('click', function(event) {
 
     event.preventDefault();
-    d3. selectAll(".lineConnect").style("display", "none");
 
-    for (var i = 0; i < userPoints.features.length; i ++) {
-      delete userPoints.features[i];
-    };
-    console.log('userPoints', userPoints);
       //clearMapOverlays();
       userName = document.getElementById('userHandle').value;
       getIDNumberAnimate();
@@ -91,6 +82,9 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
       clientId: '37c96dd1404a4fb0a6610dff7342292e',
       accessToken: '1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105',
       success: function(data) {
+        console.log('userPoints.features', userPoints.features);
+
+        userPoints.features = [];
 
         for (var i = 0; i < data.data.length; i ++) {
           userPoints.features.push(
@@ -124,6 +118,8 @@ var g = svg.append("g").attr("class", "leaflet-zoom-hide");
       clientId: '37c96dd1404a4fb0a6610dff7342292e',
       accessToken: '1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105',
       success: function(data) {
+
+        userPoints.features = [];
 
         for (var i = 0; i < data.data.length; i ++) {
           userPoints.features.push(
