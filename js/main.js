@@ -20,8 +20,20 @@ var user2Points = {
 "features": []
 };
 
+var userPointsBounds = {
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": []
+};
+
 var userBounds = function (myLayer) {
   map.fitBounds(myLayer.getBounds());
+}
+
+var groupBounds = function (myLayer1, myLayer2) {
+  var group = L.featureGroup(myLayer1, myLayer2);
+  console.log("group", group)
+  map.fitBounds(group.getBounds());
 }
 
 var map = L.map('map')
@@ -49,12 +61,47 @@ var g2 = svg2.append("g").attr("class", "leaflet-zoom-hide");
 
     event.preventDefault();
 
-    console.log('features inside the user1Points', user1Points.features.length);
-      //clearMapOverlays();
       userName1 = document.getElementById('userHandle1').value;
       userName2 = document.getElementById('userHandle2').value;
       getIDNumberMap1();
       getIDNumberMap2();
+
+      // $(document).ajaxStop(function () {
+      //
+      //   console.log('userPointsBounds.features', userPointsBounds.features);
+      //
+      //   var userBoundsLayer = L.mapbox.featureLayer().setGeoJSON(userPointsBounds
+      //     , {
+      //     style: function(feature) { return feature.properties; }
+      //   });
+      //
+      //   userBounds(userPointsBounds)
+
+  // });
+
+
+
+      // // console.log('userPointsBounds.features', userPointsBounds.features);
+      // setTimeout(userBounds(userPointsBounds), 10000);
+      //
+      //               $.when(ajax1(), ajax2(), ajax3(), ajax4()).done(function(a1, a2, a3, a4){
+      //             // the code here will be executed when all four ajax requests resolve.
+      //             // a1, a2, a3 and a4 are lists of length 3 containing the response text,
+      //             // status, and jqXHR object for each of the four ajax calls respectively.
+      //         });
+      //
+      //         function ajax1() {
+      //             // NOTE:  This function must return the value
+      //             //        from calling the $.ajax() method.
+      //             return $.ajax({
+      //                 url: "someUrl",
+      //                 dataType: "json",
+      //                 data:  yourJsonData,
+      //                 ...
+      //             });
+      //         }
+
+      // userBounds(userLayer);
   })
 
   function getIDNumberMap1() {
@@ -65,6 +112,8 @@ var g2 = svg2.append("g").attr("class", "leaflet-zoom-hide");
 
           userIDNumber1 = results.data[0].id;
           createUserMap(userIDNumber1, user1Points);
+          createUserBounds(userIDNumber1, userPointsBounds);
+
         }
       });
   }
@@ -77,6 +126,8 @@ var g2 = svg2.append("g").attr("class", "leaflet-zoom-hide");
 
           userIDNumber2 = results.data[0].id;
           createUserMap(userIDNumber2, user2Points);
+          createUserBounds(userIDNumber2, userPointsBounds);
+
         }
       });
   }
@@ -87,9 +138,6 @@ var g2 = svg2.append("g").attr("class", "leaflet-zoom-hide");
 
     console.log('features inside the user1Points', user1Points.features.length);
 
-    // linePath.exit()
-    // .remove();
-
       userName1 = document.getElementById('userHandle1').value;
       getIDNumberAnimate1();
   })
@@ -99,9 +147,6 @@ var g2 = svg2.append("g").attr("class", "leaflet-zoom-hide");
     event.preventDefault();
 
     console.log('features inside the user2Points', user1Points.features.length);
-
-    // linePath.exit()
-    // .remove();
 
       userName2 = document.getElementById('userHandle2').value;
       getIDNumberAnimate2();
@@ -132,6 +177,41 @@ var g2 = svg2.append("g").attr("class", "leaflet-zoom-hide");
       });
   }
 
+  function createUserBounds (IDnumber, userPoints) {
+    var feed = new Instafeed({
+      get: 'user',
+      target: 'feed-test',
+      userId: parseInt(IDnumber),
+      limit: '60',
+      clientId: '37c96dd1404a4fb0a6610dff7342292e',
+      accessToken: '1475152662.37c96dd.360df1e0dfd94aa3abfe431278798105',
+      success: function(data) {
+      //  console.log('user1Points.features', user1Points.features);
+
+      //userPointsBounds.features = [];
+
+        for (var i = 0; i < data.data.length; i ++) {
+
+          userPoints.features.push(
+            {
+              "type": "Feature", "properties": { "id": "route1", 'marker-size': 'small', "marker-color": "#ff8888"}, "geometry": { "type": "Point", "coordinates": [data.data[i].location.longitude, data.data[i].location.latitude]},
+            });
+          }
+
+        var userLayer = L.mapbox.featureLayer().setGeoJSON(userPoints, {
+          style: function(feature) { return feature.properties; }
+        });
+
+        userBounds(userLayer);
+        //console.log('features inside the userPointsBounds', userPoints.features.length);
+
+      }
+    });
+
+    feed.run();
+
+  }
+
   function createUserMap (IDnumber, userPoints) {
     var feed = new Instafeed({
       get: 'user',
@@ -154,7 +234,7 @@ var g2 = svg2.append("g").attr("class", "leaflet-zoom-hide");
             {
               "type": "Feature", "properties": { "id": "route1", 'marker-size': 'small', "marker-color": "#ff8888"}, "geometry": { "type": "Point", "coordinates": [data.data[i].location.longitude, data.data[i].location.latitude]},
             });
-        }
+          }
 
           else {
             userPoints.features.push(
@@ -168,7 +248,6 @@ var g2 = svg2.append("g").attr("class", "leaflet-zoom-hide");
           style: function(feature) { return feature.properties; }
           })
           .addTo(map);
-        userBounds(userLayer);
 
       }
     });
